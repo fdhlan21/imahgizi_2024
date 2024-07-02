@@ -156,7 +156,7 @@ export default function FormIbuHamilAnemia({ navigation }) {
         padding: 10, backgroundColor: colors.primary, flexDirection: "row", borderBottomLeftRadius: 10,
         borderBottomRightRadius: 10, justifyContent: 'center',
       }}>
-        <View style={{ left: -100 }}>
+        <View style={{ left: -80 }}>
           <TouchableOpacity onPress={handleBack}>
             <Image source={LeftArrow} style={{ tintColor: 'white', height: 25, width: 25 }} />
           </TouchableOpacity>

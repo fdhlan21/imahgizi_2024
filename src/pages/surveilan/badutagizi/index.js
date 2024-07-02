@@ -330,13 +330,13 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 40,
-    backgroundColor: '#dedede',
     borderRadius: 10,
     color: 'black',
     paddingRight: 10,
     paddingLeft: 10,
     fontFamily: 'Poppins-Regular',
     fontSize: 12,
+    top:-9
   },
   pickerContainer: {
     borderColor: 'gray', 
