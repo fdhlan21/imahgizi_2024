@@ -1,27 +1,67 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, TextInput, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, Image, TouchableOpacity, TextInput, StyleSheet, Alert, Picker } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import Modal from "react-native-modal";
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import colors from '../../../utils/colors';
 import { Calendar, LeftArrow } from '../../../assets/img';
-import { URLIbuHamilKEK } from '../../../utils/storedata/storedata';
+import { URLIbuHamilKEK, getData } from '../../../utils/storedata/storedata';
+
+// Import data JSON
+import kecamatanDesaData from '../../../assets/kecamatan_desa.json';
+
+const getDesaOptions = (kecamatan) => {
+  return kecamatanDesaData
+    .filter(item => item.Kecamatan.toLowerCase().replace(/\s/g, '') === kecamatan)
+    .map(item => ({ label: item.Desa, value: item.Desa.toLowerCase().replace(/\s/g, '') }));
+};
 
 export default function FormIbuHamilKEK({ navigation }) {
+  const initialKecamatan = 'bantarkalong';
+  
   const [form, setForm] = useState({
     namaibu: '',
     anakke: '',
     nik: '',
     usiaibu: '',
-    alamat: '',
+    alamat: initialKecamatan,
+    desa: '',
     usiakehamilan: '',
     hasilpengukuranlila: '',
     waktupendataan: '',
+    pendata: '',
   });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const storedUserData = await AsyncStorage.getItem('user');
+        if (storedUserData) {
+          const userData = JSON.parse(storedUserData);
+          console.log('User Data:', userData);
+          setForm(prevForm => ({ ...prevForm, pendata: userData.username }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data', error);
+      }
+    };
+
+    const desaOptions = getDesaOptions(initialKecamatan);
+    if (desaOptions.length > 0) {
+      setForm(prevForm => ({ ...prevForm, desa: desaOptions[0].value }));
+    }
+
+    fetchUserData();
+  }, []);
 
   const [selectedDateText, setSelectedDateText] = useState('Waktu Pendataan');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDateTextColor, setSelectedDateTextColor] = useState('gray');
+
+  const kecamatanOptions = [
+    ...new Set(kecamatanDesaData.map(item => item.Kecamatan))
+  ].map(kecamatan => ({ label: kecamatan, value: kecamatan.toLowerCase().replace(/\s/g, '') }));
 
   const toggleDatePicker = () => {
     setShowDatePicker(!showDatePicker);
@@ -36,6 +76,13 @@ export default function FormIbuHamilKEK({ navigation }) {
   };
 
   const handleSaveDate = () => {
+    const currentDate = form.waktupendataan || new Date();
+    setForm({ ...form, waktupendataan: currentDate });
+   
+    setSelectedDateText(
+      `${currentDate.getDate()} - ${currentDate.getMonth() + 1} - ${currentDate.getFullYear()}`
+    );
+    setSelectedDateTextColor('black');
     setShowDatePicker(false);
   };
 
@@ -55,10 +102,8 @@ export default function FormIbuHamilKEK({ navigation }) {
               textColor='black'
               onDateChange={handleDateChange}
             />
-            <TouchableOpacity onPress={toggleDatePicker}>
-              <TouchableOpacity onPress={handleSaveDate} style={styles.button}>
-                <Text style={styles.buttonText}>Simpan</Text>
-              </TouchableOpacity>
+            <TouchableOpacity onPress={handleSaveDate} style={styles.button}>
+              <Text style={styles.buttonText}>Simpan</Text>
             </TouchableOpacity>
           </View>
         </Modal>
@@ -67,14 +112,26 @@ export default function FormIbuHamilKEK({ navigation }) {
   };
 
   const handleSimpan = () => {
-    if ((form.namaibu.length == 0) || (form.anakke.length == 0) || (form.nik.length == 0) || (form.usiaibu.length == 0) || (form.alamat.length == 0) || (form.usiakehamilan.length == 0) || (form.hasilpengukuranlila.length == 0)) {
+    if ((form.namaibu.length === 0) || (form.anakke.length === 0) || (form.nik.length === 0) || (form.usiaibu.length === 0) || (form.alamat.length === 0) || (form.desa.length === 0) || (form.usiakehamilan.length === 0) || (form.hasilpengukuranlila.length === 0)) {
       alert("Mohon Isi Semua Field");
     } else {
+      if (!form.waktupendataan) {
+        const currentDate = new Date();
+        setForm({ ...form, waktupendataan: currentDate });
+        setSelectedDateText(
+          `${currentDate.getDate()} - ${currentDate.getMonth() + 1} - ${currentDate.getFullYear()}`
+        );
+        setSelectedDateTextColor('black');
+      }
+
       axios
-        .post(URLIbuHamilKEK, form)
+        .post(URLIbuHamilKEK, { ...form, waktupendataan: form.waktupendataan || new Date() })
         .then(response => {
           console.log('Response:', response.data);
-          if (response.data.status == 200) {
+          if (response.data.status === 200) {
+            AsyncStorage.setItem('namaibu', form.namaibu);
+            AsyncStorage.setItem('nik', form.nik);
+            AsyncStorage.setItem('kelompok_resiko', 'Ibu Hamil KEK'); // Menyimpan kelompok resiko
             alert("Data Berhasil di Simpan!");
             navigation.replace("SubmenuLaporan");
           } else {
@@ -94,16 +151,20 @@ export default function FormIbuHamilKEK({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
-      <View style={{ padding: 10, backgroundColor: colors.primary }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View>
-            <TouchableOpacity onPress={handleBack}>
-              <Image source={LeftArrow} style={{ tintColor: 'white', height: 25, width: 25 }} />
-            </TouchableOpacity>
-          </View>
-          <View style={{ left: -110 }}>
-            <Text style={{ fontFamily: "Poppins-SemiBold", fontSize: 15, color: 'white' }}>Ibu Hamil KEK</Text>
-          </View>
+     
+      {/* Header */}
+      <View style={{
+        padding: 10, backgroundColor: colors.primary, flexDirection: "row", borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10, justifyContent: 'center',
+      }}>
+        <View style={{ left: -100 }}>
+          <TouchableOpacity onPress={handleBack}>
+            <Image source={LeftArrow} style={{ tintColor: 'white', height: 25, width: 25 }} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={{ left: -10 }}>
+          <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 15, color: 'white', }}>Ibu Hamil KEK</Text>
         </View>
       </View>
       <ScrollView>
@@ -147,14 +208,34 @@ export default function FormIbuHamilKEK({ navigation }) {
               />
               <Text style={styles.rowText}>Tahun</Text>
             </View>
-            <Text style={{ fontFamily: 'Poppins-SemiBold', left: 2, marginTop: 20 }}>Alamat</Text>
-            <TextInput 
-              style={styles.input} 
-              placeholder='Alamat' 
-              placeholderTextColor='gray' 
-              value={form.alamat}
-              onChangeText={value => setForm({ ...form, alamat: value })} 
-            />
+            <Text style={{ fontFamily: 'Poppins-SemiBold', left: 2, marginTop: 20 }}>Alamat (Kecamatan)</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={form.alamat}
+                style={styles.picker}
+                onValueChange={(itemValue) => setForm({ ...form, alamat: itemValue, desa: getDesaOptions(itemValue)[0]?.value || '' })}
+              >
+                {kecamatanOptions.map((option, index) => (
+                  <Picker.Item key={index} label={option.label} value={option.value} />
+                ))}
+              </Picker>
+            </View>
+            {form.alamat !== '' && (
+              <>
+                <Text style={{ fontFamily: 'Poppins-SemiBold', left: 2, marginTop: 20 }}>Desa</Text>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={form.desa}
+                    style={styles.picker}
+                    onValueChange={(itemValue) => setForm({ ...form, desa: itemValue })}
+                  >
+                    {getDesaOptions(form.alamat).map((option, index) => (
+                      <Picker.Item key={index} label={option.label} value={option.value} />
+                    ))}
+                  </Picker>
+                </View>
+              </>
+            )}
             <Text style={{ fontFamily: 'Poppins-SemiBold', left: 2, marginTop: 20 }}>Usia Kehamilan</Text>
             <View style={styles.row}>
               <TextInput
@@ -190,6 +271,14 @@ export default function FormIbuHamilKEK({ navigation }) {
                 <PickerDate />
               </View>
             </View>
+            <Text style={{ fontFamily: 'Poppins-SemiBold', left: 2, marginTop: 20 }}>Pendata</Text>
+            <TextInput 
+              style={styles.input} 
+              placeholder='Pendata' 
+              placeholderTextColor='gray' 
+              value={form.pendata}
+              onChangeText={value => setForm({ ...form, pendata: value })}
+            />
           </View>
           <View style={{ marginTop: 20 }}>
             <TouchableOpacity onPress={handleSimpan} style={styles.saveButton}>
@@ -223,6 +312,13 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     fontFamily: 'Poppins-Regular',
     fontSize: 12,
+  },
+  pickerContainer: {
+    borderColor: 'gray', 
+    borderWidth: 1, 
+    borderRadius: 5, 
+    backgroundColor: '#f5f5f5',
+    marginTop: 10
   },
   row: {
     flexDirection: 'row', 

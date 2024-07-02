@@ -35,12 +35,12 @@ android_library(
 
 android_build_config(
     name = "build_config",
-    package = "com.aplikasibesti",
+    package = "com.imahgizi",
 )
 
 android_resource(
     name = "res",
-    package = "com.aplikasibesti",
+    package = "com.imahgizi",
     res = "src/main/res",
 )
 

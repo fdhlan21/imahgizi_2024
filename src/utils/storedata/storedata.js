@@ -29,4 +29,5 @@ export const URLBadutaGizi = 'https://imahgizi.okeadmin.com/Api/badutagizi';
 export const URLKonseling = 'https://imahgizi.okeadmin.com/Api/konseling';
 export const URLBantuansosial = 'https://imahgizi.okeadmin.com/Api/bantuansosial';
 export const URLRujukan = 'https://imahgizi.okeadmin.com/Api/rujukan';
+export  const updateProfile = 'https://imahgizi.okeadmin.com/Api/updateProfile'; 
 export  const MYAPP = 'Imah Gizi'; 

@@ -1,4 +1,4 @@
-package com.aplikasibesti;
+package com.imahgizi;
 
 import com.facebook.react.ReactActivity;
 

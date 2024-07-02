@@ -9,8 +9,11 @@ import MenuLapaoran3 from './menulaporan3.png'
 import Slider1 from './slider1.png';
 import LeftArrow from './left-arrow.png';
 import Calendar from './calendar.png';
+import IconHome from './home.png';
+import IconProfile from './profile.png';
+import logout from './logout.png';
 
 
 
 export{LogoImahGizi, ImahGiziCirle, MenuSurveilan1, MenuSurveilan2, MenuSurveilan3, MenuLapaoran1, MenuLapaoran2, MenuLapaoran3, 
-Slider1, LeftArrow, Calendar};
+Slider1, LeftArrow, Calendar, IconHome, IconProfile, logout};

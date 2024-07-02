@@ -16,6 +16,9 @@ import FromRoujukan from '../../pages/laporan/rujukan';
 import RegisterScreen from '../../pages/register';
 import LoginSebagai from '../../pages/loginsebagai';
 import SubmenuLaporan from '../../pages/laporan/submenu';
+import ProfilePage from '../../pages/profile';
+import EditPorfilePage from '../../pages/profile/edit';
+
 
 const Tab = createBottomTabNavigator();
 
@@ -39,6 +42,8 @@ function StackNav() {
       <Stack.Screen name="FromRujukan" component={FromRoujukan} options={{ headerShown: false }} />
       <Stack.Screen name="LoginSebagai" component={LoginSebagai} options={{ headerShown: false }} />
       <Stack.Screen name="SubmenuLaporan" component={SubmenuLaporan} options={{ headerShown: false }} />
+      <Stack.Screen name="ProfileScreen" component={ProfilePage} options={{ headerShown: false }} />
+      <Stack.Screen name="EditProfilePage" component={EditPorfilePage} options={{ headerShown: false }} />
     </Stack.Navigator>
 
   );

@@ -69,7 +69,8 @@ export default function LoginScreen({navigation}) {
         </View>
 
         <View style={{padding:10, backgroundColor:'white', borderRadius:5, marginTop:50,}}>
-
+            <Text style={{textAlign:"center", fontFamily:"Poppins-Regular", fontWeight:'bold', 
+            fontSize:25, padding:10 , }}>Login</Text>
         <Text style={{fontFamily:"Poppins-SemiBold", marginBottom:5, left: 2}}>Username</Text>
         <TextInput style={{backgroundColor:'#f5f5f5', borderWidth:1, borderRadius:5, height:40, color:"black", fontFamily:'Poppins-Regular',
         fontSize:12, paddingRight:10, paddingLeft:10, marginBottom:20,}} placeholder='Username' placeholderTextColor='black'

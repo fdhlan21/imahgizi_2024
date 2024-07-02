@@ -1,8 +1,10 @@
-import { View, Text, Image, Animated, Easing, } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import colors from '../../utils/colors'
-import { ImahGiziCirle, LogoImahGizi } from '../../assets/img'
+import { View, Text, Image, Animated, Easing, } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import colors from '../../utils/colors';
+import { ImahGiziCirle } from '../../assets/img';
 import { ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getData } from '../../utils/storedata/storedata';
 
 export default function SplashScreen({ navigation }) {
   const [fadeAnim] = useState(new Animated.Value(0));
@@ -16,14 +18,19 @@ export default function SplashScreen({ navigation }) {
     }).start();
   }, [fadeAnim]);
 
-
-  useEffect(() => {
-    // Simulasi waktu tunggu untuk animasi loading (misalnya, 3 detik)
-    setTimeout(() => {
-      navigation.navigate('LoginSebagai'); // Navigasi ke halaman selanjutnya
-    }, 1200); // Waktu tunggu dalam milidetik (3 detik)
-  }, [navigation]);
-
+  useEffect(()=>{
+    setTimeout(()=> {
+   
+     getData('user').then(res=>{
+       if(!res){
+    navigation.replace('LoginScreen');
+       }else{
+    navigation.replace('HomeScreen');
+       }
+     })
+    
+    }, 2000)
+   }, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.primary, }}>
@@ -39,5 +46,5 @@ export default function SplashScreen({ navigation }) {
         </View>
       </View>
     </View>
-  )
+  );
 }
