@@ -19,6 +19,7 @@ export default function FormBantuanSosial({ navigation }) {
     foto: null,
     nik: '',
     namaibu: '',
+    namabayi: '',
     kelompok_resiko: ''
   });
 
@@ -78,6 +79,7 @@ export default function FormBantuanSosial({ navigation }) {
     setShowDatePicker(false);
   };
 
+ 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -90,8 +92,10 @@ export default function FormBantuanSosial({ navigation }) {
         const storedNamaIbu = await AsyncStorage.getItem('namaibu');
         const storedNik = await AsyncStorage.getItem('nik');
         const storedKelompokResiko = await AsyncStorage.getItem('kelompok_resiko');
-        if (storedNamaIbu && storedNik && storedKelompokResiko) {
-          setForm(prevForm => ({ ...prevForm, namaibu: storedNamaIbu, nik: storedNik, kelompok_resiko: storedKelompokResiko }));
+
+        if (storedNamaIbu && storedNik) {
+          const namabayi = storedKelompokResiko === 'Baduta Gizi' ? await AsyncStorage.getItem('namabayi') : '/';
+          setForm(prevForm => ({ ...prevForm, namaibu: storedNamaIbu, nik: storedNik, namabayi, kelompok_resiko: storedKelompokResiko }));
         }
       } catch (error) {
         console.error('Failed to fetch user data', error);
@@ -101,32 +105,22 @@ export default function FormBantuanSosial({ navigation }) {
     fetchUserData();
   }, []);
 
-  const handleSimpan = () => {
-    if (!form.waktukegiatan) {
-      alert("Waktu Kegiatan harus diisi!");
-    } else if (!form.jenisbantuan) {
-      alert("Jenis Bantuan harus diisi!");
-    } else if (!form.sumberbantuan) {
-      alert("Sumber Bantuan harus diisi!");
-    } else if (!form.pendata) {
-      alert("Pendata harus diisi!");
-    } else if (!form.foto) {
-      alert("Anda harus mengunggah foto!");
+
+  const handleSimpan = async () => {
+    if (!form.waktukegiatan || !form.jenisbantuan || !form.sumberbantuan || !form.pendata || !form.foto) {
+      alert("Semua field harus diisi!");
     } else {
-      axios.post(URLBantuansosial, form)
-        .then(response => {
-          if (response.data.status === 200) {
-            alert("Data Berhasil di Simpan!");
-            navigation.navigate("HomeScreen");
-          } else {
-            alert("Terjadi Kesalahan!");
-          }
-        })
-        .catch(error => {
-          console.error(error);
-        });
+      try {
+        await axios.post(URLBantuansosial, form);
+        alert("Data Berhasil di Simpan!");
+        navigation.replace("HomeScreen");
+      } catch (error) {
+        console.error(error);
+        alert("Terjadi kesalahan saat menyimpan data");
+      }
     }
   };
+
 
   const handleBack = () => {
     navigation.goBack();
@@ -150,18 +144,18 @@ export default function FormBantuanSosial({ navigation }) {
       </View>
       <ScrollView>
         <View style={{ padding: 10 }}>
-          <View style={{ marginTop:0 }}>
+          <View style={{ marginTop: 0 }}>
             <Text style={{ fontFamily: 'Poppins-SemiBold', left: 2, marginTop: 20 }}>Waktu Kegiatan</Text>
             <View style={styles.dateContainer}>
               <Text style={{ ...styles.dateText, color: selectedDateTextColor }}>
                 {selectedDateText}
               </Text>
-              <PickerDate 
-                initialDate={form.waktukegiatan || new Date()} 
-                showDatePicker={showDatePicker} 
-                handleDateChange={handleDateChange} 
-                handleSaveDate={handleSaveDate} 
-                toggleDatePicker={toggleDatePicker} 
+              <PickerDate
+                initialDate={form.waktukegiatan || new Date()}
+                showDatePicker={showDatePicker}
+                handleDateChange={handleDateChange}
+                handleSaveDate={handleSaveDate}
+                toggleDatePicker={toggleDatePicker}
               />
             </View>
             <View style={{ marginTop: 20 }}>
@@ -194,6 +188,7 @@ export default function FormBantuanSosial({ navigation }) {
                 onChangeText={value => setForm({ ...form, pendata: value })}
               />
             </View>
+
             <View style={{ marginTop: 20 }}>
               <Text style={{ fontFamily: 'Poppins-SemiBold', left: 2 }}>Unggah Foto</Text>
               <TouchableOpacity onPress={pickImage} style={styles.uploadButton}>

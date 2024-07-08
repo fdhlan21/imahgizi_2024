@@ -44,7 +44,6 @@ export default function FormIbuHamilAnemia({ navigation }) {
         const storedUserData = await AsyncStorage.getItem('user');
         if (storedUserData) {
           const userData = JSON.parse(storedUserData);
-          console.log('User Data:', userData);
           setForm(prevForm => ({ ...prevForm, pendata: userData.username }));
         }
       } catch (error) {
@@ -126,7 +125,6 @@ export default function FormIbuHamilAnemia({ navigation }) {
       axios
         .post(URLIbuHamilAnemia, { ...form, waktupendataan: form.waktupendataan || new Date() })
         .then(response => {
-          console.log('Response:', response.data);
           if (response.data.status === 200) {
             AsyncStorage.setItem('namaibu', form.namaibu);
             AsyncStorage.setItem('nik', form.nik);
@@ -138,7 +136,6 @@ export default function FormIbuHamilAnemia({ navigation }) {
           }
         })
         .catch(error => {
-          console.error('Error:', error.response ? error.response.data : error.message);
           alert(`Terjadi Kesalahan: ${error.response ? error.response.data.message : error.message}`);
         });
     }

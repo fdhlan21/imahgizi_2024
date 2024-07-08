@@ -14,13 +14,14 @@ export default function FormRujukan({ navigation }) {
   const [form, setForm] = useState({
     waktukegiatan: '',
     kepemilikanjkn: '',
-    jenisjkn: '',
+    jenisjkn: 'BPJS', // Default value set to 'BPJS'
     riwayatpenyakit: '',
     fasilitas: '',
     pendata: '',
     foto: null,
     nik: '',
     namaibu: '',
+    namabayi: '',
     kelompok_resiko: '',
   });
 
@@ -62,8 +63,10 @@ export default function FormRujukan({ navigation }) {
         const storedNamaIbu = await AsyncStorage.getItem('namaibu');
         const storedNik = await AsyncStorage.getItem('nik');
         const storedKelompokResiko = await AsyncStorage.getItem('kelompok_resiko');
-        if (storedNamaIbu && storedNik && storedKelompokResiko) {
-          setForm(prevForm => ({ ...prevForm, namaibu: storedNamaIbu, nik: storedNik, kelompok_resiko: storedKelompokResiko }));
+
+        if (storedNamaIbu && storedNik) {
+          const namabayi = storedKelompokResiko === 'Baduta Gizi' ? await AsyncStorage.getItem('namabayi') : '/';
+          setForm(prevForm => ({ ...prevForm, namaibu: storedNamaIbu, nik: storedNik, namabayi, kelompok_resiko: storedKelompokResiko }));
         }
       } catch (error) {
         console.error('Failed to fetch user data', error);

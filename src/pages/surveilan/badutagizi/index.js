@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 import colors from '../../../utils/colors';
 import { Calendar, LeftArrow } from '../../../assets/img';
 import DatePicker from 'react-native-date-picker';
-import Modal from "react-native-modal";
-import axios from 'axios';
+import Modal from 'react-native-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import { URLBadutaGizi } from '../../../utils/storedata/storedata';
 import { Picker } from '@react-native-picker/picker';
 import kecamatanDesaData from '../../../assets/kecamatan_desa.json';
@@ -46,11 +46,6 @@ export default function FormBadutaGizi({ navigation }) {
         console.error('Failed to fetch user data', error);
       }
     };
-
-    const desaOptions = getDesaOptions(initialKecamatan);
-    if (desaOptions.length > 0) {
-      setForm(prevForm => ({ ...prevForm, desa: desaOptions[0].value }));
-    }
 
     fetchUserData();
   }, []);
@@ -111,41 +106,20 @@ export default function FormBadutaGizi({ navigation }) {
   };
 
   const handleSimpan = async () => {
-    if (
-      (form.namabayi.length === 0) ||
-      (form.kelamin.length === 0) ||
-      (form.namaibuayah.length === 0) ||
-      (form.nikibuayah.length === 0) ||
-      (form.usiaibu.length === 0) ||
-      (form.alamat.length === 0) ||
-      (form.desa.length === 0) ||
-      (form.usiaanak.length === 0) ||
-      (form.hasilpengukuranbb.length === 0) ||
-      (form.hasilpengukurantb.length === 0) ||
-      (form.pendata.length === 0)
-    ) {
-      alert("Mohon Isi Semua Field");
+    if (!form.waktupendataan || !form.namaibuayah || !form.nikibuayah || !form.namabayi) {
+      alert("Semua field harus diisi!");
     } else {
-      if (!form.waktupendataan) {
-        const currentDate = new Date();
-        setForm({ ...form, waktupendataan: currentDate });
-        setSelectedDateText(
-          `${currentDate.getDate()} - ${currentDate.getMonth() + 1} - ${currentDate.getFullYear()}`
-        );
-        setSelectedDateTextColor('black');
-      }
-
       try {
-        await AsyncStorage.setItem('namaibuayah', form.namaibuayah);
-        await AsyncStorage.setItem('nikibuayah', form.nikibuayah);
+        await axios.post(URLBadutaGizi, form);
+        await AsyncStorage.setItem('namaibu', form.namaibuayah);
+        await AsyncStorage.setItem('nik', form.nikibuayah);
+        await AsyncStorage.setItem('namabayi', form.namabayi);
         await AsyncStorage.setItem('kelompok_resiko', 'Baduta Gizi');
-
-        await axios.post(URLBadutaGizi, { ...form, waktupendataan: form.waktupendataan || new Date() });
         alert("Data Berhasil di Simpan!");
         navigation.replace("SubmenuLaporan");
       } catch (error) {
-        console.error('Error:', error.response ? error.response.data : error.message);
-        alert(`Terjadi Kesalahan: ${error.response ? error.response.data.message : error.message}`);
+        console.error(error);
+        alert("Terjadi kesalahan saat menyimpan data");
       }
     }
   };
@@ -156,7 +130,6 @@ export default function FormBadutaGizi({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
-     
       {/* Header */}
       <View style={{
         padding: 10, backgroundColor: colors.primary, flexDirection: "row", borderBottomLeftRadius: 10,
